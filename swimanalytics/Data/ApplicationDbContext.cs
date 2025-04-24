@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using swimanalytics.Models.Entities;
 
 namespace swimanalytics.Data
 {
@@ -6,6 +7,6 @@ namespace swimanalytics.Data
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-
+        public DbSet<User> Users { get; set; }
     }
 }
