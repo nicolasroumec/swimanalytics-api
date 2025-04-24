@@ -93,7 +93,7 @@ namespace swimanalytics.Services.Implementations
             newUser.Hash = hash;
             newUser.Salt = salt;
             newUser.IsActive = false;
-            newUser.role = Models.Enums.UserRole.Swimmer;
+            newUser.Role = Models.Enums.UserRole.Swimmer;
 
             _userRepository.Save(newUser);
 
