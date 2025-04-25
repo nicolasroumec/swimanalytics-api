@@ -1,5 +1,6 @@
 ﻿using swimanalytics.Models.DTOs;
 using swimanalytics.Models.Entities;
+using swimanalytics.Repositories.Implementations;
 using swimanalytics.Repositories.Interfaces;
 using swimanalytics.Services.Interfaces;
 using swimanalytics.Tools;
@@ -11,13 +12,19 @@ namespace swimanalytics.Services.Implementations
     {
         private readonly IUserRepository _userRepository;
         private readonly Encrypter _encrypter;
+        private readonly IVerificationCodeRepository _verificationCodeRepository;
+        private readonly IEmailService _emailService;
 
         public UserService(
             IUserRepository userRepository, 
-            Encrypter encrypter)
+            Encrypter encrypter,
+            IVerificationCodeRepository verificationCodeRepository,
+            IEmailService emailService)
         {
             _userRepository = userRepository;
             _encrypter = encrypter;
+            _verificationCodeRepository = verificationCodeRepository;
+            _emailService = emailService;
         }
 
         public Response GetAll()
@@ -54,7 +61,7 @@ namespace swimanalytics.Services.Implementations
             return response;
         }
 
-        public Response Register(RegisterDTO model) 
+        public async Task<Response> Register(RegisterDTO model) 
         {
             Response response = new Response();
             
@@ -97,8 +104,106 @@ namespace swimanalytics.Services.Implementations
 
             _userRepository.Save(newUser);
 
+            string verificationCode = VerificationCodeGenerator.GenerateRandomCode(6);
+
+            VerificationCode code = new VerificationCode()
+            {
+                UserId = newUser.Id,
+                Code = verificationCode,
+                CreatedAt = DateTime.Now,
+                ExpiresAt = DateTime.Now.AddDays(1),
+                IsUsed = false
+            };
+
+            _verificationCodeRepository.Save(code);
+
+            await _emailService.SendVerificationEmail(newUser.Email, verificationCode);
+
             response.statusCode = 200;
-            response.message = "Ok";
+            response.message = "Registration successful. Please check your email to activate your account.";
+            return response;
+        }
+
+        public async Task<Response> ResendVerificationCode(string email)
+        {
+
+            Response response = new Response();
+
+            var user = _userRepository.GetByEmail(email);
+
+            if (user == null)
+            {
+                response.statusCode = 404;
+                response.message = "User not found";
+                return response;
+            }
+
+            if (user.IsVerified)
+            {
+                response.statusCode = 400;
+                response.message = "Account already verified";
+                return response;
+            }
+
+            string verificationCode = VerificationCodeGenerator.GenerateRandomCode(6);
+
+            VerificationCode code = new VerificationCode()
+            {
+                UserId = user.Id,
+                Code = verificationCode,
+                CreatedAt = DateTime.Now,
+                ExpiresAt = DateTime.Now.AddDays(1),
+                IsUsed = false
+            };
+
+            _verificationCodeRepository.Save(code);
+
+            await _emailService.SendVerificationEmail(user.Email, verificationCode);
+
+            response.statusCode = 200;
+            response.message = "Verification code sent.";
+            return response;
+        }
+
+        public Response VerifyAccount(string email, string code)
+        {
+            Response response = new Response();
+
+            var user = _userRepository.GetByEmail(email);
+
+            if (user == null)
+            {
+                response.statusCode = 404;
+                response.message = "User not found";
+                return response;
+            }
+
+            var verificationCode = _verificationCodeRepository.GetByUserIdAndCode(user.Id, code);
+
+            if (verificationCode == null)
+            {
+                response.statusCode = 400;
+                response.message = "Invalid verification code";
+                return response;
+            }
+
+            if (verificationCode.ExpiresAt < DateTime.Now)
+            {
+                response.statusCode = 400;
+                response.message = "Verification code has expired";
+                return response;
+            }
+
+            verificationCode.IsUsed = true;
+
+            _verificationCodeRepository.Save(verificationCode);
+
+            user.IsVerified = true;
+
+            _userRepository.Save(user);
+
+            response.statusCode = 200;
+            response.message = "Account successfully verified";
             return response;
         }
     }

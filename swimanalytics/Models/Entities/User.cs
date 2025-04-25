@@ -16,6 +16,7 @@ namespace swimanalytics.Models.Entities
         public string Phone { get; set; }
         public byte[] Hash { get; set; }
         public byte[] Salt { get; set; }
+        public bool IsVerified { get; set; }
         public bool IsActive { get; set; }
         public UserRole Role { get; set; }
     }

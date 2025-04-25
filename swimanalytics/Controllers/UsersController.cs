@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Any;
+using PetAPI.Models.DTOs;
 using swimanalytics.Models.DTOs;
 using swimanalytics.Services.Implementations;
 using swimanalytics.Services.Interfaces;
@@ -73,5 +74,43 @@ namespace swimanalytics.Controllers
                 return new JsonResult(response);
             }
         }
+
+        [HttpPost("resendCode")]
+        public async Task<ActionResult<AnyType>> ResendVerificationCode([FromBody] ResendVerificationCodeDTO model)
+        {
+            Response response = new Response();
+
+            try
+            {
+                response = await _userService.ResendVerificationCode(model.email);
+                return new JsonResult(response);
+            }
+            catch (Exception e)
+            {
+                response.statusCode = 500;
+                response.message = e.Message;
+                return new JsonResult(response);
+            }
+        }
+
+        [HttpPost("verify")]
+        public ActionResult<AnyType> VerifyAccount([FromBody] VerifyAccountDTO model)
+        {
+            Response response = new Response();
+
+            try
+            {
+                response = _userService.VerifyAccount(model.email, model.code);
+                return new JsonResult(response);
+            }
+            catch (Exception e)
+            {
+                response.statusCode = 500;
+                response.message = e.Message;
+                return new JsonResult(response);
+            }
+        }
+
+
     }
 }
