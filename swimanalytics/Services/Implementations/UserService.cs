@@ -4,7 +4,9 @@ using swimanalytics.Repositories.Implementations;
 using swimanalytics.Repositories.Interfaces;
 using swimanalytics.Services.Interfaces;
 using swimanalytics.Tools;
-using testpush.Models.Responses;
+using swimanalytics.Models.Responses;
+using swimanalytics.Tools.Validators;
+using FluentValidation;
 
 namespace swimanalytics.Services.Implementations
 {
@@ -25,6 +27,63 @@ namespace swimanalytics.Services.Implementations
             _encrypter = encrypter;
             _verificationCodeRepository = verificationCodeRepository;
             _emailService = emailService;
+        }
+
+        public Response ChangePassword(ChangePasswordDTO model)
+        {
+            Response response = new Response();
+
+            var validator = new ChangePasswordDTOValidator();
+            var validationResult = validator.Validate(model);
+
+            if (!validationResult.IsValid)
+            {
+                response.statusCode = 400;
+                response.message = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
+                return response;
+            }
+
+            var user = _userRepository.GetByEmail(model.Email);
+
+            if (user == null)
+            {
+                response.statusCode = 404;
+                response.message = "User not found";
+                return response;
+            }
+
+            Encrypter.EncryptString(model.Password, out byte[] hash, out byte[] salt);
+
+            user.Hash = hash;
+            user.Salt = salt;
+
+            _userRepository.Save(user);
+
+            response.statusCode = 200;
+            response.message = "Ok";
+            return response;
+        }
+
+        public Response ChangePhone(ChangePhoneDTO model, string email)
+        {
+            Response response = new Response();
+
+            var user = _userRepository.GetByEmail(email);
+
+            if (user == null)
+            {
+                response.statusCode = 404;
+                response.message = "User not found";
+                return response;
+            }
+
+            user.Phone = model.Phone;
+
+            _userRepository.Save(user);
+
+            response.statusCode = 200;
+            response.message = "Ok";
+            return response;
         }
 
         public Response GetAll()
@@ -162,6 +221,44 @@ namespace swimanalytics.Services.Implementations
 
             response.statusCode = 200;
             response.message = "Verification code sent.";
+            return response;
+        }
+
+        public Response UpdateProfile(UpdateProfileDTO model, string email) 
+        {
+            Response response = new Response();
+
+            var validator = new UpdateProfileDTOValidator();
+            var result = validator.Validate(model);
+
+            if (!result.IsValid)
+            {
+                response.statusCode = 400;
+                response.message = string.Join(" | ", result.Errors.Select(e => e.ErrorMessage));
+                return response;
+            }
+
+            var user = _userRepository.GetByEmail(email);
+
+            if (user == null)
+            {
+                response.statusCode = 404;
+                response.message = "User not found";
+                return response;
+            }
+
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.Gender = model.Gender;
+            user.Height = model.Height;
+            user.Weight = model.Weight;
+            user.Wingspan = model.Wingspan;
+            user.Club = model.Club;
+
+            _userRepository.Save(user);
+
+            response.statusCode = 200;
+            response.message = "Profile updated successfully";
             return response;
         }
 

@@ -1,4 +1,4 @@
-﻿namespace testpush.Models.Responses
+﻿namespace swimanalytics.Models.Responses
 {
     public class ResponseModel<T> : Response
     {

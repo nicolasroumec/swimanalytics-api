@@ -1,7 +1,7 @@
 ﻿using swimanalytics.Models.DTOs;
 using swimanalytics.Models.Entities;
 using swimanalytics.Models.Enums;
-using testpush.Models.Responses;
+using swimanalytics.Models.Responses;
 
 namespace swimanalytics.Services.Interfaces
 {

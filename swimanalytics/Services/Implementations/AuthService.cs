@@ -9,7 +9,7 @@ using swimanalytics.Tools;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using testpush.Models.Responses;
+using swimanalytics.Models.Responses;
 
 namespace swimanalytics.Services.Implementations
 {
