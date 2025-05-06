@@ -7,7 +7,7 @@ using swimanalytics.Models.Enums;
 using swimanalytics.Repositories.Implementations;
 using swimanalytics.Repositories.Interfaces;
 using swimanalytics.Services.Interfaces;
-using testpush.Models.Responses;
+using swimanalytics.Models.Responses;
 
 namespace swimanalytics.Controllers
 {

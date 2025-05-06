@@ -159,6 +159,7 @@ namespace swimanalytics.Services.Implementations
             newUser.Hash = hash;
             newUser.Salt = salt;
             newUser.IsActive = false;
+            newUser.IsVerified = false;
             newUser.Role = Models.Enums.UserRole.Swimmer;
 
             _userRepository.Save(newUser);

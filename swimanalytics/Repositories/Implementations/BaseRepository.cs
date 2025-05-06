@@ -20,7 +20,7 @@ namespace swimanalytics.Repositories.Implementations
             return RepositoryContext.Set<T>().AsNoTrackingWithIdentityResolution();
         }
 
-        public IQueryable<T> FindAll(Func<IQueryable<T>, IIncludableQueryable<T, object>> includes = null)
+        public IQueryable<T> FindAll(Func<IQueryable<T>, IIncludableQueryable<T, object>>? includes = null)
         {
             IQueryable<T> queryable = RepositoryContext.Set<T>();
 

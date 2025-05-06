@@ -1,8 +1,9 @@
-﻿using System.Net.Mail;
+﻿using swimanalytics.Services.Interfaces;
+using System.Net.Mail;
 
 namespace swimanalytics.Services.Implementations
 {
-    public class EmailService
+    public class EmailService : IEmailService
     {
         private readonly IConfiguration _configuration;
 
