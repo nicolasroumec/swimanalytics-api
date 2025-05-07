@@ -148,7 +148,8 @@ namespace swimanalytics.Services.Implementations
             User newUser = new User();
 
             newUser.FirstName = model.FirstName;
-            newUser.LastName = model.LastName; 
+            newUser.LastName = model.LastName;
+            newUser.DateOfBirth = model.DateOfBirth;
             newUser.Gender = model.Gender;
             newUser.Height = model.Height;
             newUser.Weight = model.Weight;
