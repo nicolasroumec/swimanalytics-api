@@ -7,6 +7,7 @@ namespace swimanalytics.Services.Interfaces
     {
         public Response ChangePassword(ChangePasswordDTO model);
         public Response ChangePhone(ChangePhoneDTO model, string email);
+        public Response ForgotPassword(ForgotPasswordDTO model);
         public Response GetAll();
         public Response GetByEmail(string email);
         public Task<Response> Register(RegisterDTO model);

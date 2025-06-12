@@ -61,6 +61,23 @@ namespace swimanalytics.Controllers
             }
         }
 
+        [HttpPost("forgotPassword")]
+        public ActionResult<AnyType> ForgotPassword([FromBody] ForgotPasswordDTO model)
+        {
+            Response response = new Response();
+            try
+            {
+                response = _userService.ForgotPassword(model);
+                return new JsonResult(response);
+            }
+            catch (Exception e)
+            {
+                response.statusCode = 500;
+                response.message = e.Message;
+                return new JsonResult(response);
+            }
+        }
+
         [HttpGet("getAll")]
         public ActionResult GetAll() 
         {

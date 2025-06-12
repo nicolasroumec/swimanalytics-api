@@ -16,17 +16,20 @@ namespace swimanalytics.Services.Implementations
         private readonly Encrypter _encrypter;
         private readonly IVerificationCodeRepository _verificationCodeRepository;
         private readonly IEmailService _emailService;
+        private readonly IAuthService _authService;
 
         public UserService(
             IUserRepository userRepository, 
             Encrypter encrypter,
             IVerificationCodeRepository verificationCodeRepository,
-            IEmailService emailService)
+            IEmailService emailService,
+            IAuthService authService)
         {
             _userRepository = userRepository;
             _encrypter = encrypter;
             _verificationCodeRepository = verificationCodeRepository;
             _emailService = emailService;
+            _authService = authService;
         }
 
         public Response ChangePassword(ChangePasswordDTO model)
@@ -83,6 +86,27 @@ namespace swimanalytics.Services.Implementations
 
             response.statusCode = 200;
             response.message = "Ok";
+            return response;
+        }
+
+        public Response ForgotPassword(ForgotPasswordDTO model)
+        {
+            Response response = new Response();
+
+            var user = _userRepository.GetByEmail(model.Email);
+            if (user == null)
+            {
+                response.statusCode = 404;
+                response.message = "User not found";
+                return response;
+            }
+
+            string resetToken = _authService.MakeToken(model.Email, user.Role, 15); // 15 minutos
+
+            _emailService.SendPasswordResetEmail(model.Email, resetToken);
+
+            response.statusCode = 200;
+            response.message = "Reset email sent";
             return response;
         }
 
